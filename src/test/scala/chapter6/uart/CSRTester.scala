@@ -96,7 +96,7 @@ class CSRTester extends BaseTester {
         idle()
         for (d <- txData) {
           hwrite(RegInfo.txFifo, d)
-          expect(c.io.dbg.get.txFifo, d)
+          expect(c.io.dbg.get.tx_fifo, d)
         }
       }
     } should be (true)
@@ -162,7 +162,7 @@ class CSRTester extends BaseTester {
         idle()
         for (d <- txData) {
           uwrite(d)
-          expect(c.io.dbg.get.rxFifo, txData(0))
+          expect(c.io.dbg.get.rx_fifo, txData(0))
         }
       }
     } should be (true)
@@ -183,7 +183,7 @@ class CSRTester extends BaseTester {
         idle()
         for (d <- txData) {
           hwrite(RegInfo.txFifo, d)
-          expect(c.io.dbg.get.txFifo, d)
+          expect(c.io.dbg.get.tx_fifo, d)
         }
       }
     } should be (true)

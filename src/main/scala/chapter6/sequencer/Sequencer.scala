@@ -19,10 +19,11 @@ object State extends ChiselEnum {
 
 /**
   * Uartのデータをループバックするシーケンサー
-  * @param p
-  * @param debug
+  * @param p SimpleIOParamsのインスタンス
+  * @param debug trueでデバッグポートが追加される
   */
-class Sequencer(p: SimpleIOParams)(implicit val debug: Boolean = false) extends Module {
+class Sequencer(p: SimpleIOParams)
+               (implicit val debug: Boolean = false) extends Module {
 
   import State._
   import chapter6.uart.RegInfo._

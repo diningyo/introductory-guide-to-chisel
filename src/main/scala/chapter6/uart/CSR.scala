@@ -27,22 +27,6 @@ abstract class UartReg extends Bundle {
 }
 
 /**
-  * 制御レジスタ
-  */
-class CtrlReg extends UartReg {
-  val rst_rx_fifo = UInt(1.W)
-  val rst_tx_fifo = UInt(1.W)
-
-  // dataをビット単位で書き込み
-  def write(data: UInt): Unit = {
-    rst_rx_fifo := data(1)
-    rst_tx_fifo := data(0)
-  }
-
-  def read(): UInt = Cat(rst_rx_fifo, rst_tx_fifo)
-}
-
-/**
   * ステータス・レジスタ
   */
 class StatReg extends UartReg with IgnoreSeqInBundle {
@@ -68,10 +52,9 @@ class StatReg extends UartReg with IgnoreSeqInBundle {
   * デバッグ用のBundle
   */
 class CSRDebugIO extends Bundle {
-  val rxFifo = Output(UInt(8.W))
-  val txFifo = Output(UInt(8.W))
+  val rx_fifo = Output(UInt(8.W))
+  val tx_fifo = Output(UInt(8.W))
   val stat = Output(UInt(8.W))
-  val ctrl = Output(UInt(8.W))
 }
 
 /**
@@ -105,31 +88,25 @@ class CSR(sp: SimpleIOParams)(implicit debug: Boolean = false) extends Module {
 
   val io = IO(new CSRIO(sp))
 
+  // FIFOの段数
   val fifoDepth = 16
 
   val m_rx_fifo = Module(new FIFO(UInt(8.W), fifoDepth))
   val m_tx_fifo = Module(new FIFO(UInt(8.W), fifoDepth))
-  val w_ctrl = WireInit(0.U.asTypeOf(new CtrlReg))
   val w_stat = WireInit(0.U.asTypeOf(new StatReg))
 
-  // write
+  // レジスタのアクセス制御信号
   val w_rdsel_rxfifo = (io.sram.addr === RegInfo.rxFifo.U) && io.sram.rden
   val w_rdsel_txfifo = (io.sram.addr === RegInfo.txFifo.U) && io.sram.wren
   val w_rdsel_stat = (io.sram.addr === RegInfo.stat.U) && io.sram.rden
-  val w_wrsel_ctrl = (io.sram.addr === RegInfo.ctrl.U) && io.sram.wren
 
-  // stat
+  // statusレジスタの接続
   w_stat.txfifo_empty := m_tx_fifo.io.rd.empty
   w_stat.txfifo_full := m_tx_fifo.io.wr.full
   w_stat.rxfifo_full := m_rx_fifo.io.wr.full
   w_stat.rxfifo_valid := !m_rx_fifo.io.rd.empty
 
-  // ctrl
-  when (w_wrsel_ctrl) {
-    w_ctrl.write(io.sram.wrdata)
-  }
-
-  // read
+  // リードの制御
   io.sram.rddv := RegNext(w_rdsel_rxfifo || w_rdsel_stat, false.B)
   io.sram.rddata := RegNext(MuxCase(0.U, Seq(
     w_rdsel_rxfifo -> m_rx_fifo.io.rd.data,
@@ -146,9 +123,8 @@ class CSR(sp: SimpleIOParams)(implicit debug: Boolean = false) extends Module {
   // debug
   if (debug) {
     val dbg = io.dbg.get
-    dbg.rxFifo := m_rx_fifo.io.rd.data
-    dbg.txFifo := m_tx_fifo.io.wr.data
+    dbg.rx_fifo := m_rx_fifo.io.rd.data
+    dbg.tx_fifo := m_tx_fifo.io.wr.data
     dbg.stat := w_stat.read()
-    dbg.ctrl := w_ctrl.read()
   }
 }
