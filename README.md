@@ -53,7 +53,7 @@ runMain Generator chapter4.SampleReg
 
 MIT License
 
-Copyright (c) 2019 diningyo
+Copyright (c) 2019-2020 diningyo
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
