@@ -3,6 +3,7 @@
 package chapter6.uart
 
 import chisel3._
+import chisel3.stage.ChiselStage
 import chisel3.util._
 
 object RegAddress {
@@ -70,6 +71,6 @@ class SampleAbstractReg extends Module {
   io.rddata := MuxCase(0.U, readDataSeq.map(_._2))
 }
 
-object E extends App {
-  Driver.execute(Array(""), () => new SampleAbstractReg)
+object Elaborate extends App {
+  (new ChiselStage).emitVerilog(new SampleAbstractReg, Array(""))
 }

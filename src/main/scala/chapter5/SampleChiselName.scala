@@ -4,6 +4,7 @@ package chapter5
 
 import chisel3._
 import chisel3.internal.naming.chiselName
+import chisel3.stage.ChiselStage
 import chisel3.util._
 
 /**
@@ -28,5 +29,5 @@ class SampleChiselName extends Module {
 }
 
 object ElaborateSampleChiselName extends App {
-  Driver.execute(args, () => new SampleChiselName)
+  (new ChiselStage).emitVerilog(new SampleChiselName, args)
 }

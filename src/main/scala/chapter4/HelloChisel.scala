@@ -3,8 +3,8 @@
 package chapter4
 
 import math.pow
-
 import chisel3._
+import chisel3.stage.ChiselStage
 import chisel3.util._
 
 /**
@@ -57,5 +57,5 @@ object ElaborateHelloChisel extends App {
   val interval = 500                // 500msec
 
   // HelloChiselモジュールのクラスパラメーターを渡して実行
-  Driver.execute(args, () => new HelloChisel(freq, interval))
+  (new ChiselStage).emitVerilog(new HelloChisel(freq, interval), args)
 }

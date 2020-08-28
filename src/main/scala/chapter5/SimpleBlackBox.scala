@@ -3,6 +3,7 @@
 package chapter5
 
 import chisel3._
+import chisel3.stage.ChiselStage
 
 /**
   * 既存のRTLのChiselモジュールラッパークラス
@@ -38,7 +39,6 @@ class SimpleBlackBoxTop extends Module {
   * SimpleBlackBoxTopのRTL生成
   */
 object ElaborateSimpleBlackBoxTop extends App {
-  Driver.execute(Array(
-    "-td=rtl"
-  ), () => new SimpleBlackBoxTop)
+  (new ChiselStage).emitVerilog(
+    new SimpleBlackBoxTop, Array("-td=rtl"))
 }

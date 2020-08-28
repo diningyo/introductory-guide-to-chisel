@@ -3,6 +3,7 @@
 package chapter4
 
 import chisel3._
+import chisel3.stage.ChiselStage
 
 /**
   * 通常のモジュール
@@ -25,7 +26,8 @@ object ElaborateSampleRequireAsyncReset2 extends App {
   )
 
   val modName = "SampleDefaultResetType"
-  chisel3.Driver.execute(genArgs :+ s"-tn=${modName}_sync", () => new chapter4.SampleRequireAsyncReset2)
-  chisel3.Driver.execute(genArgs :+ s"-tn=${modName}_async",
-    () => new chapter4.SampleRequireAsyncReset2 with RequireAsyncReset)
+  (new ChiselStage).emitVerilog(
+    new chapter4.SampleRequireAsyncReset2, genArgs :+ s"-tn=${modName}_sync")
+  (new ChiselStage).emitVerilog(
+    new chapter4.SampleRequireAsyncReset2 with RequireAsyncReset, genArgs :+ s"-tn=${modName}_async")
 }

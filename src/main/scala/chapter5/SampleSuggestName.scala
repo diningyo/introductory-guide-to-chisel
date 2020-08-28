@@ -3,6 +3,7 @@
 package chapter5
 
 import chisel3._
+import chisel3.stage.ChiselStage
 import chisel3.util._
 
 /**
@@ -42,9 +43,9 @@ class SampleSuggestName2(portNames: Seq[String]) extends Module {
 }
 
 object ElaborateSampleSuggestName extends App {
-  Driver.execute(args, () => new SampleSuggestName)
+  (new ChiselStage).emitVerilog(new SampleSuggestName, args)
 }
 
 object ElaborateSampleSuggestName2 extends App {
-  Driver.execute(args, () => new SampleSuggestName2(Seq("A", "B")))
+  (new ChiselStage).emitVerilog(new SampleSuggestName2(Seq("A", "B")), args)
 }
