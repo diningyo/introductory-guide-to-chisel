@@ -1,5 +1,7 @@
 // See README.md for license details.
 
+import math.pow
+
 import chapter5.{RX, TX}
 import chapter6.SimpleIOParams
 import chisel3._
@@ -15,14 +17,13 @@ object GetInstance {
     * @return modPathで指定したChiselモジュールのインスタンス
     * @note このapplyで作れるのはクラスパラメータを持たないクラスのみ
     */
-  def apply(modPath: String): () => Module = {
-    () =>
-      Class.forName(modPath)
-        .getConstructor()
-        .newInstance() match {
-        case m: Module => m
-        case _ => throw new ClassNotFoundException("The class must be inherited chisel3.Module")
-      }
+  def apply(modPath: String): Module = {
+    Class.forName(modPath)
+      .getConstructor()
+      .newInstance() match {
+      case m: Module => m
+      case _ => throw new ClassNotFoundException("The class must be inherited chisel3.Module")
+    }
   }
 }
 
@@ -42,13 +43,26 @@ object RTLGenerator extends App {
     // chapter1
     case "chapter1.FIFO" =>
       chisel3.Driver.execute(genArgs, () => new chapter1.FIFO(16))
+    // chapter4
+    case "chapter4.HelloChisel" =>
+      val freq = 100 * pow(10, 6).toInt // 50MHz
+      val interval = 500                // 500msec
+      Driver.execute(args, () => new chapter4.HelloChisel(freq, interval))
+    case "chapter4.SampleRequireAsyncReset2" =>
+      val modName = "SampleRequireAsyncReset2"
+      chisel3.Driver.execute(genArgs :+ s"-tn=${modName}_sync",
+        () => new chapter4.SampleRequireAsyncReset2)
+      chisel3.Driver.execute(genArgs :+ s"-tn=${modName}_async",
+        () => new chapter4.SampleRequireAsyncReset2 with RequireAsyncReset)
     // chapter5
     case "chapter5.SampleTop" =>
       chisel3.Driver.execute(genArgs, () => new chapter5.SampleTop(4, 8))
     case "chapter5.SampleDontTouch" =>
       val modName = "SampleDontTouch"
-      chisel3.Driver.execute(genArgs :+ s"-tn=${modName}_true", () => new chapter5.SampleDontTouch(true))
-      chisel3.Driver.execute(genArgs :+ s"-tn=${modName}_false", () => new chapter5.SampleDontTouch(false))
+      chisel3.Driver.execute(genArgs :+ s"-tn=${modName}_true",
+        () => new chapter5.SampleDontTouch(true))
+      chisel3.Driver.execute(genArgs :+ s"-tn=${modName}_false",
+        () => new chapter5.SampleDontTouch(false))
     case "chapter5.SampleDelayParameterizeTop" =>
       chisel3.Driver.execute(genArgs, () => new chapter5.SampleDelayParameterizeTop(true, false))
     case "chapter5.SampleNDelayParameterizeTop" =>
@@ -62,11 +76,10 @@ object RTLGenerator extends App {
       chisel3.Driver.execute(genArgs, () => new chapter5.IOParameterize(TX))
       chisel3.Driver.execute(genArgs, () => new chapter5.IOParameterize(RX))
     case "chapter5.SampleSuggestName2" =>
-      chisel3.Driver.execute(genArgs, () => new chapter5.SampleSuggestName2(Seq("aa", "bb")))
+      chisel3.Driver.execute(genArgs, () => new chapter5.SampleSuggestName2(Seq("A", "B")))
     case "chapter6.EchoBackTop" =>
       val p = SimpleIOParams()
       chisel3.Driver.execute(genArgs, () => new chapter6.EchoBackTop(p))
-    case _ => chisel3.Driver.execute(genArgs, GetInstance(args(0)))
+    case _ => (new stage.ChiselStage).emitVerilog(GetInstance(args(0)), genArgs)
   }
-
 }
