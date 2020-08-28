@@ -32,8 +32,8 @@ class SampleMuxCase extends Module {
     val out = Output(UInt(8.W))
   })
 
-  io.out := MuxCase(io.in1, Seq(
+  io.out := RegNext(MuxCase(io.in1, Seq(
     (io.sel === 1.U) -> io.in2,
     (io.sel === 2.U) -> io.in3,
-    (io.sel === 3.U) -> io.in4))
+    (io.sel === 3.U) -> io.in4)), 0.U)
 }

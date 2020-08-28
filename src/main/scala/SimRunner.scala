@@ -23,7 +23,7 @@ object SimRunner extends App {
           step(1)
         }
       }
-    case c => chisel3.iotesters.Driver.execute(genArgs, GetInstance(c)) {
+    case c => chisel3.iotesters.Driver.execute(genArgs, () => GetInstance(c)) {
       c => new PeekPokeTester(c) {
         step(1)
       }

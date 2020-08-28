@@ -6,7 +6,7 @@ import chisel3._
 import chisel3.experimental.ChiselEnum
 import chisel3.util._
 
-import chapter5.{FIFO, FIFOIO, FIFORdIO, FIFOWrIO}
+import chapter5.{FIFORdIO, FIFOWrIO}
 
 import scala.math.{pow, round}
 
@@ -79,6 +79,7 @@ class Ctrl(direction: UartDirection, durationCount: Int) extends Module {
   val w_update_req = r_duration_ctr === (durationCount - 1).U
   val w_fin = m_stm.io.state.stop && w_update_req
 
+  // アイドル時の制御
   when (m_stm.io.state.idle) {
     when (w_start_req) {
       r_duration_ctr := initDurationCount.U
@@ -93,6 +94,7 @@ class Ctrl(direction: UartDirection, durationCount: Int) extends Module {
     }
   }
 
+  // データ処理時の制御
   when (m_stm.io.state.data) {
     when (w_update_req) {
       r_bit_idx := r_bit_idx + 1.U
@@ -101,6 +103,7 @@ class Ctrl(direction: UartDirection, durationCount: Int) extends Module {
     r_bit_idx := 0.U
   }
 
+  // クラスパラメータのdirectionを使って各方向の論理を実装
   direction match {
     case UartTx =>
       val reg = io.reg.asInstanceOf[FIFORdIO[UInt]]
@@ -127,7 +130,7 @@ class Ctrl(direction: UartDirection, durationCount: Int) extends Module {
       reg.data := r_rx_data
   }
 
-  // txStm <-> ctrl
+  // m_stm <-> ctrlの接続
   m_stm.io.start_req := w_start_req
   m_stm.io.data_req := m_stm.io.state.start && w_update_req
   m_stm.io.stop_req := m_stm.io.state.data && w_update_req && (r_bit_idx === 7.U)
@@ -145,7 +148,7 @@ class CtrlStateMachine extends Module {
     val stop_req = Input(Bool())
     val fin = Input(Bool())
 
-    // state
+    // ステートの出力
     val state = Output(new Bundle {
       val idle = Output(Bool())
       val start = Output(Bool())
@@ -154,6 +157,7 @@ class CtrlStateMachine extends Module {
     })
   })
 
+  // ステート用のEnum
   object CtrlState extends ChiselEnum {
     val sIdle = Value
     val sStart = Value
@@ -163,6 +167,7 @@ class CtrlStateMachine extends Module {
 
   val r_stm = RegInit(CtrlState.sIdle)
 
+  // ステートマシンの実装
   switch (r_stm) {
     is (CtrlState.sIdle) {
       when (io.start_req) {

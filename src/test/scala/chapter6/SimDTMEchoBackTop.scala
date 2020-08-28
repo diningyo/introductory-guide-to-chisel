@@ -21,7 +21,8 @@ import scala.math.{pow, round}
 class SimDTMEchoBackTop(p: SimpleIOParams,
                         baudrate: Int = 9600,
                         clockFreq: Int = 100)
-                       (testData: Seq[Int] = Seq(0xa5, 0x2a), limit: Int) extends BaseSimDTM(limit) {
+                       (testData: Seq[Int] = Seq(0xa5, 0x2a), limit: Int)
+  extends BaseSimDTM(limit) {
   val io = IO(new Bundle with BaseSimDTMIO {
     val uart_rx = Output(UInt(1.W))
   })

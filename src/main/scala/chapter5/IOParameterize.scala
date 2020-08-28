@@ -31,8 +31,3 @@ class IOParameterize(dir: Direction) extends Module {
       i.info := true.B
   }
 }
-
-object El extends App {
-  Driver.execute(args :+ "-tn=TX", () => new IOParameterize(TX))
-  Driver.execute(args :+ "-tn=RX", () => new IOParameterize(RX))
-}

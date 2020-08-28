@@ -26,13 +26,3 @@ class IOPortParameterize(hasOptInput: Boolean, hasOptOutput: Boolean) extends Mo
     io.opt_out.get := io.in
   }
 }
-
-/**
-  * IOPortParameterizeのRTLを生成
-  */
-object ElaborateIOPortParameterize extends App {
-  val moduleName = "IOPortParameterize"
-  Driver.execute(Array("-td=rtl", s"-tn=${moduleName}_false"), () => new IOPortParameterize(false, false))
-  Driver.execute(Array("-td=rtl", s"-tn=${moduleName}_true"), () => new IOPortParameterize(true, true))
-}
-

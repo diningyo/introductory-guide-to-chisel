@@ -8,7 +8,12 @@ import chisel3.util._
 import chapter6.uart._
 import chapter6.sequencer._
 
-
+/**
+  * EchoBackTop
+  * @param p SimpleIOのパラメータ
+  * @param baudrate ボーレート
+  * @param clockFreq クロック周波数(MHz)
+  */
 class EchoBackTop(p: SimpleIOParams, baudrate: Int = 9600, clockFreq: Int = 100) extends Module {
   val io = IO(new UartIO)
 

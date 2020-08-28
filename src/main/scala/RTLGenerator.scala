@@ -15,14 +15,13 @@ object GetInstance {
     * @return modPathで指定したChiselモジュールのインスタンス
     * @note このapplyで作れるのはクラスパラメータを持たないクラスのみ
     */
-  def apply(modPath: String): () => Module = {
-    () =>
-      Class.forName(modPath)
-        .getConstructor()
-        .newInstance() match {
-        case m: Module => m
-        case _ => throw new ClassNotFoundException("The class must be inherited chisel3.Module")
-      }
+  def apply(modPath: String): Module = {
+    Class.forName(modPath)
+      .getConstructor()
+      .newInstance() match {
+      case m: Module => m
+      case _ => throw new ClassNotFoundException("The class must be inherited chisel3.Module")
+    }
   }
 }
 
@@ -42,6 +41,12 @@ object RTLGenerator extends App {
     // chapter1
     case "chapter1.FIFO" =>
       chisel3.Driver.execute(genArgs, () => new chapter1.FIFO(16))
+    // chapter4
+    case "chapter4.FIFO" =>
+      val modName = "SampleRequireAsyncReset2"
+      chisel3.Driver.execute(genArgs :+ s"-tn=${modName}_sync", () => new chapter4.SampleRequireAsyncReset2)
+      chisel3.Driver.execute(genArgs :+ s"-tn=${modName}_async",
+        () => new chapter4.SampleRequireAsyncReset2 with RequireAsyncReset)
     // chapter5
     case "chapter5.SampleTop" =>
       chisel3.Driver.execute(genArgs, () => new chapter5.SampleTop(4, 8))
@@ -66,7 +71,7 @@ object RTLGenerator extends App {
     case "chapter6.EchoBackTop" =>
       val p = SimpleIOParams()
       chisel3.Driver.execute(genArgs, () => new chapter6.EchoBackTop(p))
-    case _ => chisel3.Driver.execute(genArgs, GetInstance(args(0)))
+    case _ => (new stage.ChiselStage).emitVerilog(GetInstance(args(0)), genArgs)
   }
 
 }

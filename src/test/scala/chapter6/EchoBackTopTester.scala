@@ -25,17 +25,17 @@ class EchoBackerUnitTester(c: SimDTMEchoBackTop,
   val rx = c.io.uart_rx
 
   /**
-    * Uart data receive
-    * @param exp expect value
+    * Uartのデータ受信
+    * @param exp 期待値
     */
   def receive(exp: Int): Unit = {
 
-    // detect start
+    // uart_rxが下がるまでウェイト
     while (peek(rx) == 0x1) {
       step(1)
     }
 
-    // shift half period
+    // 半周期ずらすためにduration / 2サイクルでループ
     for (_ <- Range(0, duration / 2)) {
       step(1)
     }
@@ -50,7 +50,7 @@ class EchoBackerUnitTester(c: SimDTMEchoBackTop,
       expect(rx, expTxBit, s"don't match exp value bit($idx) : exp = $expTxBit")
     }
 
-    // stop bits
+    // ストップビットの受信
     for (_ <- Range(0, duration)) {
       step(1)
     }
