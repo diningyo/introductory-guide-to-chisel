@@ -48,12 +48,6 @@ object RTLGenerator extends App {
       val freq = 100 * pow(10, 6).toInt // 50MHz
       val interval = 500                // 500msec
       Driver.execute(args, () => new chapter4.HelloChisel(freq, interval))
-    case "chapter4.SampleRequireAsyncReset2" =>
-      val modName = "SampleRequireAsyncReset2"
-      chisel3.Driver.execute(genArgs :+ s"-tn=${modName}_sync",
-        () => new chapter4.SampleRequireAsyncReset2)
-      chisel3.Driver.execute(genArgs :+ s"-tn=${modName}_async",
-        () => new chapter4.SampleRequireAsyncReset2 with RequireAsyncReset)
     // chapter5
     case "chapter5.SampleTop" =>
       chisel3.Driver.execute(genArgs, () => new chapter5.SampleTop(4, 8))
@@ -80,6 +74,6 @@ object RTLGenerator extends App {
     case "chapter6.EchoBackTop" =>
       val p = SimpleIOParams()
       chisel3.Driver.execute(genArgs, () => new chapter6.EchoBackTop(p))
-    case _ => (new stage.ChiselStage).emitVerilog(GetInstance(args(0)), genArgs)
+    case _ => chisel3.Driver.execute(genArgs, () => GetInstance(args(0)))
   }
 }
