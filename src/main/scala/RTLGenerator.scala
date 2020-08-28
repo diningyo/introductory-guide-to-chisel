@@ -5,7 +5,6 @@ import math.pow
 import chapter5.{RX, TX}
 import chapter6.SimpleIOParams
 import chisel3._
-import chisel3.iotesters.PeekPokeTester
 
 /**
   * Stringでもらったクラスのパスからインスタンスを生成する
