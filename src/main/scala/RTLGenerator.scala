@@ -49,7 +49,7 @@ object RTLGenerator extends App {
       (new stage.ChiselStage).emitVerilog(new chapter4.HelloChisel(freq, interval), genArgs)
     case "chapter4.SampleRequireAsyncReset2" =>
       val modName = "SampleRequireAsyncReset2"
-      (new stage.ChiselStage).emitVerilog(,
+      (new stage.ChiselStage).emitVerilog(
         new chapter4.SampleRequireAsyncReset2, genArgs :+ s"-tn=${modName}_sync")
       (new stage.ChiselStage).emitVerilog(
         new chapter4.SampleRequireAsyncReset2 with RequireAsyncReset, genArgs :+ s"-tn=${modName}_async")
@@ -60,7 +60,7 @@ object RTLGenerator extends App {
       val modName = "SampleDontTouch"
       (new stage.ChiselStage).emitVerilog(
         new chapter5.SampleDontTouch(true), genArgs :+ s"-tn=${modName}_true")
-      (new stage.ChiselStage).emitVerilog(,
+      (new stage.ChiselStage).emitVerilog(
         new chapter5.SampleDontTouch(false), genArgs :+ s"-tn=${modName}_false")
     case "chapter5.SampleDelayParameterizeTop" =>
       (new stage.ChiselStage).emitVerilog(new chapter5.SampleDelayParameterizeTop(true, false), genArgs)
