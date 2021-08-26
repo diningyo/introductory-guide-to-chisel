@@ -138,6 +138,71 @@ import chisel3.util._
 
  - [src/main/scala/chapter4/HelloChisel.scala#L26](https://github.com/diningyo/introductory-guide-to-chisel/blob/master/src/main/scala/chapter4/HelloChisel.scala#L26)
 
+
+### 4.4.3 組み合わせ論理回路 - Wire / WireDefault (p.102)
+
+本文中の次の説明の「Wireを作ることができます」は誤った説明でした。
+
+> "Chiselのハードウェア"を@<code>{val}に格納しても、@<code>{Wire}を作ることができます。
+> この方法で作成した場合は、元の"Chiselのハードウェア"の属性を引き継ぐことに注意してください。初期値として値を入れておきたい場合は、@<code>{WireDefault}を使用してください。
+
+正しくは「左辺で定義した変数に、右辺の論理が束縛された」だけとなります。ふるまいとしては組み合わせ論理相当の動きとなりますが、定義された変数には`Wire`の属性が付与されていいないので、再代入を行おうとするとエラーになります（次のサンプルを参照下さい）。どちらかと言うと、エイリアスといった方が正確です。
+
+
+```scala
+class Sample extends Module {
+  val io = IO(new Bundle {
+    val in_0 = Input(UInt(2.W))
+    val in_1 = Input(UInt(2.W))
+    val sel = Input(Bool())
+    val out_wire_add = Output(UInt(8.W))
+    val out_reg_add = Output(UInt(8.W))
+  })
+
+  val w_wire_add = io.in_0 + io.in_1
+
+  // Wireであれば、定義後に`:=`で再代入が可能だが
+  // `w_wire_add`はWireではないので、エラーになる。
+  w_wire_add := io.in_0
+
+  val r_reg_0 = RegInit(io.in_0)
+  val r_reg_1 = RegInit(io.in_1)
+
+  // 右辺がレジスタの論理でも同様のあつかい
+  val w_reg_add = r_reg_0 + r_reg_1
+
+  // 次のコードはエラーになる
+  w_reg_add := r_reg_0 + r_reg_1
+
+  io.out_wire_add := w_wire_add
+  io.out_reg_add := w_reg_add
+}
+```
+
+上記のコードをエラボレートすると、次のようなエラーメッセージが出力されます。
+
+```scala
+[error] chisel3.internal.ChiselException: Cannot reassign to read-only UInt(OpResult in Sample)
+[error]         ...
+[error]         at Sample.<init>(Sample.scala:27)
+[error]         at Elaborate$.$anonfun$rtl$1(Sample.scala:36)
+[error]         ... (Stack trace trimmed to user code only, rerun with --full-stacktrace if you wish to see the full stack trace)
+```
+
+上記を回避するには`w_wire_add`を`Wire`として宣言した後、`:=`で論理を接続するか、`WireDefault`を使うようにして下さい。
+
+- 回避方法
+
+```scala
+// Wireとして宣言
+val w_wire_add = Wire(UInt(8.W))
+w_wire_add := io.in_0 + io.in_1
+
+// WireDefaultで宣言と同時に論理を接続
+val w_wire_add = WireDefault(io.in_0 + io.in_1)
+```
+
+
 ## サンプルコードの取り扱いについて
 
 このサンプルコードを含んだプロジェクト一式についてはMIT Licenseにしてます。
